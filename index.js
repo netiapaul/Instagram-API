@@ -10,7 +10,8 @@ dotenv.config({
 });
 const fs = require('fs')
 const morgan = require('morgan')
-const path = require('path')
+const path = require('path');
+const mongoose = require('mongoose');
 
 // Middlewares
 app.use(bodyParser.json());
@@ -19,14 +20,21 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(cors());
 // log only 4xx and 5xx responses to console
-app.use(morgan('dev', {
-    skip: function (req, res) { return res.statusCode < 400 }
-  }))
+app.use(morgan('dev'))
    
   // log all requests to access.log
-  app.use(morgan('common', {
-    stream: fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
-  }))
+// app.use(morgan('common', {
+//   stream: fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+// }));
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true
+}, () => {
+  console.log('MONGO DB connection created');
+});
 
 // Middlewares routes
 app.use('/api/v1/users',users);
@@ -36,5 +44,3 @@ app.use('/api/v1/users',users);
 app.listen(PORT, () => {
     console.log(`server is running in ${process.env.NODE_ENV} mode on port ${PORT}`)
 });
-
-//TODO create a new DB in mongo atlas 
